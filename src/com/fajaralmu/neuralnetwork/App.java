@@ -123,14 +123,54 @@ public class App {
 	}
 
 	public void train(TrainSet trainSet, int loops, int batchSize) {
+
+		if (trainSet.INPUT_SIZE != INPUT_SIZE || trainSet.OUTPUT_SIZE != OUTPUT_SIZE)
+			return;
+
 		for (int i = 0; i < loops; i++) {
 			TrainSet batchExtracted = trainSet.extractBatch(batchSize);
 			for (int batch = 0; batch < batchSize; batch++) {
 				double learningRate = 0.3;
-				this.train(batchExtracted.getInput (batch), batchExtracted.getOutput(batch), learningRate );
-				
+				this.train(batchExtracted.getInput(batch), batchExtracted.getOutput(batch), learningRate);
+
 			}
+			
+			System.out.println(MSE(batchExtracted));
 		}
+	}
+
+	/**
+	 * mean square error
+	 * 
+	 * @param input
+	 * @param target
+	 * @return
+	 */
+	public double MSE(double[] input, double[] target) {
+		if (input.length != INPUT_SIZE || target.length != OUTPUT_SIZE)
+			return 0;
+		calculate(input);
+
+		double v = 0;
+		for (int i = 0; i < target.length; i++) {
+
+			v += (target[i] - output[NETWORK_SIZE - 1][i]) * (target[i] - output[NETWORK_SIZE - 1][i]);
+		}
+
+		return v / (2d * target.length);
+	}
+
+	/**
+	 * Mean Square Error
+	 * @param trainSet
+	 * @return
+	 */
+	public double MSE(TrainSet trainSet) {
+		double v = 0;
+		for (int i = 0; i < trainSet.size(); i++) {
+			v += MSE(trainSet.getInput(i), trainSet.getOutput(i));
+		}
+		return v / trainSet.size();
 	}
 
 	public static void mainOld(String[] args) {
@@ -157,23 +197,23 @@ public class App {
 		System.out.println(Arrays.toString(o));
 
 	}
-	
-	static double[] getDouble(double... doubles) { 
-		
+
+	static double[] getDouble(double... doubles) {
+
 		return doubles;
 	}
-	
+
 	public static void main(String[] args) {
-		
-		App app = new App(4,3,3,2);
-		
+
+		App app = new App(4, 3, 3, 2);
+
 		TrainSet trainSet = new TrainSet(4, 2);
-		trainSet.addData(getDouble(0.1,0.2,0.3,0.4) , getDouble(0.9, 0.1));
-		trainSet.addData(getDouble(0.9,0.8,0.7,0.6) , getDouble(0.1, 0.9)); 
-		trainSet.addData(getDouble(0.3,0.8,0.1,0.4) , getDouble(0.3, 0.7)); 
-		trainSet.addData(getDouble(0.9,0.8,0.1,0.2) , getDouble(0.7, 0.3));
+		trainSet.addData(getDouble(0.1, 0.2, 0.3, 0.4), getDouble(0.9, 0.1));
+		trainSet.addData(getDouble(0.9, 0.8, 0.7, 0.6), getDouble(0.1, 0.9));
+		trainSet.addData(getDouble(0.3, 0.8, 0.1, 0.4), getDouble(0.3, 0.7));
+		trainSet.addData(getDouble(0.9, 0.8, 0.1, 0.2), getDouble(0.7, 0.3));
 		app.train(trainSet, 100000, 4);
-		
+
 		for (int i = 0; i < 4; i++) {
 			System.out.println(Arrays.toString(app.calculate(trainSet.getInput(i))));
 		}
